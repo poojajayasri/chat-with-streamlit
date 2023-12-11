@@ -68,6 +68,23 @@ from langchain.schema import HumanMessage, SystemMessage, AIMessage
 
 from pathlib import Path
 
+st.set_page_config(page_title="DataMap AI", page_icon="frilogo.png", layout="wide", initial_sidebar_state="collapsed")
+
+# --- PATH SETTINGS ---
+THIS_DIR = Path(__file__).parent if "__file__" in locals() else Path.cwd()
+ASSETS_DIR = THIS_DIR / "assets"
+STYLES_DIR = THIS_DIR / "styles"
+
+CSS_FILE = STYLES_DIR / "main.css"
+
+def load_css_file(css_file_path):
+    with open(css_file_path) as f:
+        return st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css_file(CSS_FILE)
+
+
+
 if 'tab_selection' not in st.session_state:
     st.session_state.tab_selection = " "
 if 'session_button' not in st.session_state:
