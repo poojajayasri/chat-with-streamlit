@@ -120,7 +120,7 @@ with main_page_sidebar:
     st.session_state.tab_selection = option_menu(
         menu_title = '',
         menu_icon = 'list-columns-reverse',
-        options = ['Home','Add Key','Upload files','Begin Chat','---','---','---','---','Contact us','Logout'],
+        options = ['Home','Add Key','Upload files','Begin Chat','---','---','---','---','Contact us'],
         icons = ['house-door-fill','key-fill','database-fill-add','chat-fill','','','','','send-plus-fill','box-arrow-in-right'],
         orientation="horizontal",
         styles = {
