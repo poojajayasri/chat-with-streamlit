@@ -538,7 +538,7 @@ if st.session_state.tab_selection == "Upload files":
                     
                     #st.write(st.session_state.pages)
                     try:
-                        #st.write(pages)
+                        st.write(pages)
                         st.session_state.index = test_embed()
                         st.session_state.pages = pages
                         #st.write(pages)
