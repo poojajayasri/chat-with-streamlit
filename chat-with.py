@@ -958,7 +958,7 @@ if st.session_state.tab_selection == "Begin Chat":
                     ]
 
                     def ask_chatgpt(conversation: List[Message]) -> Tuple[str, List[Message]]:
-                        client = OpenAI(api_key="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")
+                        client = OpenAI(api_key=st.session_state.api)
 
                         messages = [asdict(c) for c in conversation]
 
