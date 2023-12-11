@@ -742,8 +742,8 @@ if st.session_state.tab_selection == "Begin Chat":
                                         llm_response1 = "Please Upload your files and try again"
                                 elif st.session_state.option.strip() == 'General Query: Flowchart':
                                     try:
-                                        st.write(human_prompt)
-                                        st.write("yooooo" + st.session_state.api)
+                                        #st.write(human_prompt)
+                                        #st.write("yooooo" + st.session_state.api)
                                         llm = OpenAI(openai_api_key=st.session_state.api)
                                         gen_response=llm(human_prompt + "   \n answer in detail")
                                         if len(gen_response)>10:
