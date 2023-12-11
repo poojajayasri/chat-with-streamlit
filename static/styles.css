@@ -1,0 +1,39 @@
+.chat-row {
+    display: flex;
+    margin: 5px;
+    width: 100%;
+}
+
+.row-reverse {
+    flex-direction: row-reverse;
+}
+
+.chat-bubble {
+    font-family: "Source Sans Pro", sans-serif, "Segoe UI", "Roboto", sans-serif;
+    border: 1px solid transparent;
+    padding: 5px 10px;
+    margin: 0px 7px;
+    max-width: 70%;
+}
+
+.ai-bubble {
+    border: 1px solid #e0dede;
+    border-radius: 10px;
+}
+
+.human-bubble {
+    
+    background: #8B79B6;
+    color: white;
+    border: 1px solid rgb(97, 50, 131);
+    border-radius: 5px;
+}
+
+.chat-icon {
+    border-radius: 5px;
+}
+
+[data-testid="stContainer"]  {
+    overflow: scroll;
+    height: 400px;
+}
