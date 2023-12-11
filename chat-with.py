@@ -591,7 +591,7 @@ if st.session_state.tab_selection == "Contact us":
 if st.session_state.tab_selection == "Begin Chat":
     st.session_state.option = st.selectbox(
     '',
-    ('General Query: Flowchart', 'General Query: Mindmap', 'Uploaded data: Flowchart', 'Uploaded data: Quick Query', 'Uploaded data: Conversational Chat'),label_visibility="collapsed", )
+    ('General Query: Flowchart', 'Uploaded data: Flowchart', 'Uploaded data: Quick Query', 'Uploaded data: Conversational Chat'),label_visibility="collapsed", )
     if st.session_state.api:
         #if st.session_state.agree:
         try:
