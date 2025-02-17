@@ -352,7 +352,7 @@ if st.session_state.tab_selection == "Upload files":
                 
                 if uploaded_file or transformed_list or urlinput1:
                     for file in uploaded_file:
-if file.name.lower().endswith('.docx'):
+                        if file.name.lower().endswith('.docx'):
                             xy = os.getcwd()
                             upload_dir = f"{xy}/uploads/"
                             os.makedirs(upload_dir, exist_ok=True)
