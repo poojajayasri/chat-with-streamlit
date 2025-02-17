@@ -745,7 +745,7 @@ if st.session_state.tab_selection == "Begin Chat":
                                             llm_response1 = "Error creating mindmap. Please try again."
                                             gen_response = ""
                                             
-                                else:
+                            else:
                                     human_prompt = "Please enter a valid query"
                                     
                                 try:
