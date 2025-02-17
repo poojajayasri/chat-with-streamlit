@@ -995,7 +995,6 @@ if st.session_state.tab_selection == "Begin Chat":
                             model="gpt-4o-mini",
                             messages=messages,
                         )
-resp = client.
                         # st.write(response)
                         # turn into a Message object
                         msg = Message(**response["choices"][0]["message"])
