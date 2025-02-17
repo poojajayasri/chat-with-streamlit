@@ -989,7 +989,7 @@ if st.session_state.tab_selection == "Begin Chat":
                         # response = client.chat.create(
                         #     messages=messages,
                         # )
-                        response = client.completions.create(
+                        response = client.Completion.create(
                             model="gpt-4o-mini",
                             messages=messages,
                         )
