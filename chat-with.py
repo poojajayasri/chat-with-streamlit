@@ -693,9 +693,9 @@ if st.session_state.tab_selection == "Begin Chat":
                         if (len(human_prompt) > 5):
                             try:
                                 diag = """step1. rewrite the result as a directed graph  \n
-                                step2: make sure the resuly is exactly in the format as provided in the sample. 
-                                step 3: provide No other explanations. max no. of nodes: 10. sample format(take into consideration only the structure and format of the sample, not the actual words. make sure to include the quotes as shown in the sample. do not display the sample). 
-                                Sample: 
+                                step2: make sure the resuly is exactly in the format as provided in the sample.
+                                step 3: provide No other explanations. max no. of nodes: 10. sample format(take into consideration only the structure and format of the sample, not the actual words. make sure to include the quotes as shown in the sample. do not display the sample).
+                                Sample:
                                             "run" -> "intr"
                                             "intr" -> "runbl intr"
                                             "runbl" -> "run"
@@ -842,10 +842,10 @@ if st.session_state.tab_selection == "Begin Chat":
                                 content = chat.message
                             if content:
                                 div = f"""
-                        <div class="chat-row 
+                        <div class="chat-row
                             {'' if chat.origin == 'ai' else 'row-reverse'}">
                             <img class="chat-icon" src="{
-                                'https://cdn.discordapp.com/attachments/852337726904598574/1126648713788526722/ai.png' if chat.origin == 'ai' 
+                                'https://cdn.discordapp.com/attachments/852337726904598574/1126648713788526722/ai.png' if chat.origin == 'ai'
                                             else 'https://cdn.discordapp.com/attachments/852337726904598574/1126648675238682655/human.png'}"
                                 width=32 height=32>
                             <div class="chat-bubble
@@ -853,8 +853,8 @@ if st.session_state.tab_selection == "Begin Chat":
                                 &#8203;{content}
                             </div>
                         </div>
-                        
-                        
+
+
                                 """
                             # st.write("hi")
                             # st.graphviz_chart(chat.message)
@@ -884,10 +884,10 @@ if st.session_state.tab_selection == "Begin Chat":
                     with chat_placeholder1:
                         for chat in st.session_state.history1:
                             div = f"""
-                    <div class="chat-row 
+                    <div class="chat-row
                         {'' if chat.origin == 'ai' else 'row-reverse'}">
                         <img class="chat-icon" src="{
-                            'https://cdn.discordapp.com/attachments/852337726904598574/1126648713788526722/ai.png' if chat.origin == 'ai' 
+                            'https://cdn.discordapp.com/attachments/852337726904598574/1126648713788526722/ai.png' if chat.origin == 'ai'
                                         else 'https://cdn.discordapp.com/attachments/852337726904598574/1126648675238682655/human.png'}"
                             width=32 height=32>
                         <div class="chat-bubble
@@ -947,11 +947,11 @@ if st.session_state.tab_selection == "Begin Chat":
 
                             Note that the graph is undirected and thus the order of the nodes does not matter
                             and duplicates will be ignored. Another important note: the graph should be sparse,
-                            with many nodes and few edges from each node. Too many edges will make it difficult 
-                            to understand and hard to read. The answer should only include the actions to perform, 
-                            nothing else. If the instructions are vague or even if only a single word is provided, 
-                            still generate a graph of multiple nodes and edges that that could makes sense in the 
-                            situation. Remember to think step by step and debate pros and cons before settling on 
+                            with many nodes and few edges from each node. Too many edges will make it difficult
+                            to understand and hard to read. The answer should only include the actions to perform,
+                            nothing else. If the instructions are vague or even if only a single word is provided,
+                            still generate a graph of multiple nodes and edges that that could makes sense in the
+                            situation. Remember to think step by step and debate pros and cons before settling on
                             an answer to accomplish the request as well as possible.
 
                             Here is my first request: Add a mind map about machine learning.
@@ -965,11 +965,14 @@ if st.session_state.tab_selection == "Begin Chat":
                             add("Supervised learning", "Classification")
                             add("Unsupervised learning", "Clustering")
                             add("Unsupervised learning", "Anomaly Detection")
-                            add("Unsupervised learning", "Dimensionality Reduction")
-                            add("Unsupervised learning", "Association Rule Learning")
+                            add("Unsupervised learning",
+                                "Dimensionality Reduction")
+                            add("Unsupervised learning",
+                                "Association Rule Learning")
                             add("Clustering", "K-means")
                             add("Classification", "Logistic Regression")
-                            add("Reinforcement learning", "Proximal Policy Optimization")
+                            add("Reinforcement learning",
+                                "Proximal Policy Optimization")
                             add("Reinforcement learning", "Q-learning")
                         """, role="assistant"),
                         Message("""
@@ -982,18 +985,17 @@ if st.session_state.tab_selection == "Begin Chat":
                     ]
 
                     def ask_chatgpt(conversation: List[Message]) -> Tuple[str, List[Message]]:
-                        client = OpenAI(api_key=st.session_state.api)
-
+                        client = openai(api_key=st.session_state.api)
                         messages = [asdict(c) for c in conversation]
 
                         # response = client.chat.create(
                         #     messages=messages,
                         # )
-                        response = client.chat.completions.create(
+                        response = client.completions.create(
                             model="gpt-4o-mini",
                             messages=messages,
                         )
-
+resp = client.
                         # st.write(response)
                         # turn into a Message object
                         msg = Message(**response["choices"][0]["message"])
