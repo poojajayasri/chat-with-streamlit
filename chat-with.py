@@ -31,10 +31,7 @@ from PIL import Image
 import mimetypes
 mimetypes.add_type('application/javascript', '.js')
 mimetypes.add_type('text/css', '.css')
-from langchain.document_loaders.csv_loader import CSVLoader
-
-
-
+from langchain_community.document_loaders import CSVLoader
 from langchain.llms import OpenAI
 from langchain_community.callbacks import get_openai_callback
 from langchain.chains import ConversationChain
