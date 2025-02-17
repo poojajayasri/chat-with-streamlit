@@ -986,7 +986,11 @@ if st.session_state.tab_selection == "Begin Chat":
 
                         messages = [asdict(c) for c in conversation]
 
-                        response = client.chat.create(
+                        # response = client.chat.create(
+                        #     messages=messages,
+                        # )
+                        response = client.completions.create(
+                            model="gpt-4o-mini",
                             messages=messages,
                         )
 
