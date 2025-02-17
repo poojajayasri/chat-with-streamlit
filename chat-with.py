@@ -671,7 +671,7 @@ if st.session_state.tab_selection == "Begin Chat":
                             llm = OpenAI(
                                 temperature=0,
                                 openai_api_key=st.session_state.api,
-                                model_name="gpt-3.5-turbo"
+                                model_name="gpt-4o-mini"
                             )
                             
                             st.session_state.conversation = qa1
@@ -679,7 +679,7 @@ if st.session_state.tab_selection == "Begin Chat":
                             llm = OpenAI(
                                 temperature=0,
                                 openai_api_key=st.session_state.api,
-                                model_name="gpt-3.5-turbo"
+                                model_name="gpt-4o-mini"
                             )
                             
                             st.session_state.conversation1 = agent_chain1
