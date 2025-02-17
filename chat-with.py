@@ -26,7 +26,7 @@ from langchain_community.document_loaders import (
     UnstructuredImageLoader,
     SeleniumURLLoader
 )
-from langchain_community.chains import ConversationalRetrievalChain
+from langchain.chains import ConversationalRetrievalChain
 from PIL import Image
 import mimetypes
 mimetypes.add_type('application/javascript', '.js')
