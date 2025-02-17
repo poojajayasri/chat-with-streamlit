@@ -15,11 +15,11 @@ from streamlit_agraph import agraph, Node, Edge, Config
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_community.document_loaders import YoutubeLoader
-from langchain_community.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from streamlit_option_menu import option_menu
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import (
     Docx2txtLoader,
     PyPDFLoader,
