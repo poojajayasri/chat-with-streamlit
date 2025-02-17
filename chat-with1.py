@@ -542,6 +542,7 @@ if st.session_state.tab_selection == "Upload files":
                         st.session_state.pages = pages
                     except Exception as e:
                         st.info("Loading Unsuccessful")
+                        st.info(e)
                         print(e)
             else:
                 st.header("Successfully uploaded")
