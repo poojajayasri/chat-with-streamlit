@@ -1,7 +1,6 @@
-
 from __future__ import annotations
 import re
-from typing import Optional, Tuple, List, Union, Literal
+from typing import Optional, Tuple, List, Union, Literal, Any, Dict
 import base64
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -13,24 +12,21 @@ import graphviz
 from dataclasses import dataclass, asdict
 from textwrap import dedent
 from streamlit_agraph import agraph, Node, Edge, Config
-
 from langchain_community.chat_models import ChatOpenAI
-from langchain import PromptTemplate
-from langchain.document_loaders import YoutubeLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.docstore.document import Document
-from typing import Any, Dict, List
+from langchain_core.prompts import PromptTemplate
+from langchain_community.document_loaders import YoutubeLoader
+from langchain_community.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_core.documents import Document
 from streamlit_option_menu import option_menu
-from langchain.document_loaders import Docx2txtLoader
-from langchain.document_loaders import PyPDFLoader
-from langchain.document_loaders.image import UnstructuredImageLoader
-from langchain.document_loaders import SeleniumURLLoader
-from typing import Literal
-import streamlit as st
-from dataclasses import dataclass
-from langchain.chains import ConversationalRetrievalChain
+from langchain_community.document_loaders import (
+    Docx2txtLoader,
+    PyPDFLoader,
+    UnstructuredImageLoader,
+    SeleniumURLLoader
+)
+from langchain_community.chains import ConversationalRetrievalChain
 from PIL import Image
 import mimetypes
 mimetypes.add_type('application/javascript', '.js')
