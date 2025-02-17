@@ -1,4 +1,5 @@
 pip
+langchain-community
 argon2-cffi
 trycourier
 streamlit_cookies_manager
