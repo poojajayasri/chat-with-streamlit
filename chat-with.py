@@ -242,8 +242,8 @@ if st.session_state.tab_selection == "Upload files":
                 embeddings = OpenAIEmbeddings(openai_api_key=st.session_state.api)
                 st.header("Supported: PDF, Docx, PNG, CSV, Youtube & Website URLs")
                 with st.expander("Upload Files"):
-                    urlinput = st.text_input("", placeholder="Enter Youtube links separated by spaces")
-                    urlinput1 = st.text_input("", placeholder="jsmastery.pro", help='URL format: jsmastery.pro')
+                    urlinput = st.text_input("Youtube Links", placeholder="Enter Youtube links separated by spaces")
+                    urlinput1 = st.text_input("Website Link", placeholder="jsmastery.pro", help='URL format: jsmastery.pro')
                     
                     uploaded_file = st.file_uploader("**Supported Formats: PDF, Docx, PNG (Extracts text from image)**", accept_multiple_files=True , help='Uploaded files will not be stored', type=['png', 'pdf', 'csv', 'docx']   )
                     #st.write(st.session_state.uploaded_file[0].name)
@@ -1236,7 +1236,7 @@ if st.session_state.tab_selection == "Begin Chat":
                         #st.markdown("**Chat**")
                             col1,col2 = st.columns([6, 1])
                             with col1:
-                                query = st.text_input("", 
+                                query = st.text_input("Mindmap", 
                                     value=st.session_state.get("mindmap-input", ""),
                                     key="mindmap-input",
                                     label_visibility="collapsed",
@@ -1288,7 +1288,7 @@ if st.session_state.tab_selection == "Add Key":
     else:
         st.header("Load Your API Key")
         st.markdown("[OpenAI API Key](%s)" % "https://platform.openai.com/account/api-keys")
-        st.session_state.api = st.text_input(" ",placeholder = "Enter your API Key", type = 'password' , help='API Keys will not be stored')
+        st.session_state.api = st.text_input("API Key ",placeholder = "Enter your API Key", type = 'password' , help='API Keys will not be stored')
         if st.session_state.api: 
             st.rerun()
     
