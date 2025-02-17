@@ -36,7 +36,7 @@ from langchain.document_loaders.csv_loader import CSVLoader
 
 
 from langchain.llms import OpenAI
-from langchain.callbacks import get_openai_callback
+from langchain_community.callbacks import get_openai_callback
 from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationSummaryMemory
 import streamlit.components.v1 as components
@@ -1263,7 +1263,7 @@ if st.session_state.tab_selection == "Begin Chat":
                                     mindmap.ask_for_extended_graph(text=query)
                                 # since inputs also have to be updated, everything
                                 # is rerun
-                                st.experimental_rerun()
+st.rerun()
                             else:
                                 mindmap.visualize(graph_type)
 
