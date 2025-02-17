@@ -1263,7 +1263,7 @@ if st.session_state.tab_selection == "Begin Chat":
                                     mindmap.ask_for_extended_graph(text=query)
                                 # since inputs also have to be updated, everything
                                 # is rerun
-st.rerun()
+                                    st.rerun()
                             else:
                                 mindmap.visualize(graph_type)
 
@@ -1287,13 +1287,13 @@ if st.session_state.tab_selection == "Add Key":
             #st.write("HEHE")
             st.session_state.api =""
             if not len(st.session_state.api)<2:
-st.rerun()
+                st.rerun()
     else:
         st.header("Load Your API Key")
         st.markdown("[OpenAI API Key](%s)" % "https://platform.openai.com/account/api-keys")
         st.session_state.api = st.text_input(" ",placeholder = "Enter your API Key", type = 'password' , help='API Keys will not be stored')
         if st.session_state.api: 
-st.rerun()
+            st.rerun()
     
 if st.session_state.tab_selection == "Home":
     co1,co2,co3 = st.columns([5,8,5])
