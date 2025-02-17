@@ -744,6 +744,8 @@ if st.session_state.tab_selection == "Begin Chat":
                                         except Exception as e:
                                             llm_response1 = "Error creating mindmap. Please try again."
                                             gen_response = ""
+                                except Exception as e:
+                                    print(e)
                                             
                             else:
                                     human_prompt = "Please enter a valid query"
