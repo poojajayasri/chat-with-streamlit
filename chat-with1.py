@@ -56,72 +56,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain.schema import HumanMessage, SystemMessage, AIMessage
 from pathlib import Path
 
-# Enhanced Flowchart and Mindmap Styles
-FLOWCHART_STYLES = {
-    'graph_attrs': {
-        'rankdir': 'TB',
-        'splines': 'ortho',
-        'nodesep': '0.8',
-        'ranksep': '1.0',
-        'bgcolor': 'white',
-        'concentrate': 'true'
-    },
-    'node_attrs': {
-        'style': 'filled,rounded',
-        'shape': 'box',
-        'fillcolor': '#E8F0FE',
-        'color': '#4285F4',
-        'fontname': 'Arial',
-        'fontsize': '12',
-        'penwidth': '2',
-        'margin': '0.3,0.2'
-    },
-    'edge_attrs': {
-        'color': '#4285F4',
-        'penwidth': '2',
-        'arrowhead': 'vee',
-        'arrowsize': '1.2',
-        'fontname': 'Arial',
-        'fontsize': '10',
-        'fontcolor': '#666666'
-    }
-}
-
-MINDMAP_STYLES = {
-    'graph_attrs': {
-        'rankdir': 'LR',
-        'splines': 'spline',
-        'overlap': 'false',
-        'sep': '+25',
-        'bgcolor': 'white',
-        'concentrate': 'true'
-    },
-    'node_attrs': {
-        'style': 'filled',
-        'shape': 'ellipse',
-        'fillcolor': '#FFF3E0',
-        'color': '#FF9800',
-        'fontname': 'Arial',
-        'fontsize': '12',
-        'penwidth': '2'
-    },
-    'edge_attrs': {
-        'color': '#FF9800',
-        'penwidth': '2',
-        'arrowhead': 'none',
-        'len': '2.0'
-    },
-    'central_node_attrs': {
-        'shape': 'doubleoctagon',
-        'style': 'filled',
-        'fillcolor': '#FFA726',
-        'color': '#E65100',
-        'penwidth': '3',
-        'fontsize': '14',
-        'fontname': 'Arial Bold'
-    }
-}
-
 st.set_page_config(page_title="DataMap AI", page_icon="frilogo.png", layout="wide", initial_sidebar_state="collapsed")
 
 # --- PATH SETTINGS ---
@@ -161,38 +95,75 @@ if 'pages' not in st.session_state:
 COLOR = "#F7A7A6"
 FOCUS_COLOR = "#84b3d1"
 
+@dataclass
+class Message:
+    """Class for keeping track of a chat message."""
+    origin: Literal["human", "ai"]
+    message: str
+
 def enhance_flowchart_visualization(dot, content):
     """Enhance flowchart visualization with better styling"""
-    # Parse input content
     graph_def = f'''digraph{{{content}}}'''
-    
-    # Create enhanced Graphviz graph
     enhanced_dot = graphviz.Digraph()
-    enhanced_dot.attr(**FLOWCHART_STYLES['graph_attrs'])
-    enhanced_dot.attr('node', **FLOWCHART_STYLES['node_attrs'])
-    enhanced_dot.attr('edge', **FLOWCHART_STYLES['edge_attrs'])
-    
-    # Parse and add nodes/edges while maintaining the original structure
+    enhanced_dot.attr(rankdir='TB', 
+                     splines='ortho',
+                     nodesep='0.8',
+                     ranksep='1.0',
+                     bgcolor='white')
+    enhanced_dot.attr('node', 
+                     style='filled,rounded',
+                     shape='box',
+                     fillcolor='#E8F0FE',
+                     color='#4285F4',
+                     fontname='Arial',
+                     fontsize='12',
+                     penwidth='2')
+    enhanced_dot.attr('edge',
+                     color='#4285F4',
+                     penwidth='2',
+                     arrowhead='vee',
+                     fontname='Arial',
+                     fontsize='10')
     current_dot = graphviz.Source(graph_def)
     enhanced_dot.body.extend(current_dot.body)
-    
     return enhanced_dot
 
 def create_mindmap(central_topic, topics, connections):
     """Create an enhanced mindmap visualization"""
     dot = graphviz.Graph(comment='Mind Map')
-    dot.attr(**MINDMAP_STYLES['graph_attrs'])
+    dot.attr(rankdir='LR',
+            splines='spline',
+            overlap='false',
+            sep='+25',
+            bgcolor='white')
     
     # Add central topic with special styling
-    dot.node(central_topic, **MINDMAP_STYLES['central_node_attrs'])
+    dot.node(central_topic,
+            shape='doubleoctagon',
+            style='filled',
+            fillcolor='#FFA726',
+            color='#E65100',
+            penwidth='3',
+            fontsize='14',
+            fontname='Arial Bold')
     
     # Add other topics
     for topic in topics:
-        dot.node(topic, **MINDMAP_STYLES['node_attrs'])
+        dot.node(topic,
+                style='filled',
+                shape='ellipse',
+                fillcolor='#FFF3E0',
+                color='#FF9800',
+                fontname='Arial',
+                fontsize='12',
+                penwidth='2')
     
-    # Add connections with enhanced styling
+    # Add connections
     for source, target in connections:
-        dot.edge(source, target, **MINDMAP_STYLES['edge_attrs'])
+        dot.edge(source, target,
+                color='#FF9800',
+                penwidth='2',
+                len='2.0')
     
     return dot
 
@@ -211,7 +182,6 @@ def process_mindmap_query(query: str, api_key: str) -> Tuple[str, List[str], Lis
     llm = OpenAI(temperature=0.7, api_key=api_key)
     response = llm(prompt)
     
-    # Parse response
     lines = response.strip().split('\n')
     central_topic = lines[0].strip()
     topics = [t.strip() for t in lines[1].split(',')]
@@ -224,27 +194,21 @@ def parse_pdf(file: BytesIO) -> List[str]:
     output = []
     for page in pdf.pages:
         text = page.extract_text()
-        # Merge hyphenated words
         text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
-        # Fix newlines in the middle of sentences
         text = re.sub(r"(?<!\n\s)\n(?!\s\n)", " ", text.strip())
-        # Remove multiple newlines
         text = re.sub(r"\n\s*\n", "\n\n", text)
         output.append(text)
     return output
 
 def text_to_docs(text: str) -> List[Document]:
-    """Converts text content to a list of Documents with metadata"""
     if isinstance(text, str):
         text = [text]
     
     page_docs = [Document(page_content=str(page)) for page in text]
     
-    # Add page numbers as metadata
     for i, doc in enumerate(page_docs):
         doc.metadata["page"] = i + 1
     
-    # Split pages into chunks
     doc_chunks = []
     for doc in page_docs:
         text_splitter = RecursiveCharacterTextSplitter(
@@ -255,7 +219,7 @@ def text_to_docs(text: str) -> List[Document]:
         chunks = text_splitter.split_text(doc.page_content)
         for i, chunk in enumerate(chunks):
             doc = Document(
-                page_content=chunk, 
+                page_content=chunk,
                 metadata={"page": doc.metadata["page"], "chunk": i}
             )
             doc.metadata["source"] = f"{doc.metadata['page']}-{doc.metadata['chunk']}"
@@ -264,11 +228,10 @@ def text_to_docs(text: str) -> List[Document]:
     return doc_chunks
 
 def test_embed():
-    """Create and test embeddings index"""
     embeddings = OpenAIEmbeddings(openai_api_key=st.session_state.api)
     if 'index' not in st.session_state:
         st.session_state.index = FAISS.from_documents(
-            [Document(page_content='hi', metadata={'source': 'one).pdf', 'page': 1})], 
+            [Document(page_content='hi', metadata={'source': 'one).pdf', 'page': 1})],
             embeddings
         )
     
@@ -277,13 +240,78 @@ def test_embed():
     st.header("Successfully uploaded")
     return index
 
-def test_embed2():
-    """Alternative embedding test"""
-    embeddings = OpenAIEmbeddings(openai_api_key=st.session_state.api)
-    with st.spinner("Loading..."):
-        index = FAISS.from_documents(st.session_state.pages, embeddings)
-    st.success("Successfully loaded!", icon="✅")
-    return index
+def get_diagram_prompt():
+    return """
+    step1. rewrite the result as a directed graph
+    step2: make sure the result is exactly in the format as provided in the sample.
+    step3: provide No other explanations. max no. of nodes: 10. sample format
+    (take into consideration only the structure and format of the sample,
+    not the actual words. make sure to include the quotes as shown in the sample.
+    do not display the sample).
+    Sample:
+        "run" -> "intr"
+        "intr" -> "runbl intr"
+        "runbl" -> "run"
+        "run" -> "kernel"
+        "kernel" -> "zombie"
+        "kernel" -> "sleep"
+        "kernel" -> "runmem"
+    """
+
+def process_message(message):
+    with get_openai_callback() as cb:
+        try:
+            if len(message) > 5:
+                if st.session_state.option.strip() == 'Uploaded data: Flowchart':
+                    gen_response = st.session_state.conversation.run(
+                        "Answer in detail: " + message
+                    )
+                    llm = OpenAI(openai_api_key=st.session_state.api)
+                    llm_response = llm(gen_response + get_diagram_prompt())
+                    final_response = enhance_flowchart_visualization(graphviz.Digraph(), llm_response).source + " diagramcreator"
+                
+                elif st.session_state.option.strip() == 'Uploaded data: Quick Query':
+                    final_response = st.session_state.conversation.run(
+                        "Answer in detail: " + message
+                    )
+                
+                elif st.session_state.option.strip() == 'General Query: Flowchart':
+                    llm = OpenAI(openai_api_key=st.session_state.api)
+                    gen_response = llm(message + " \n answer in detail")
+                    if len(gen_response) > 10:
+                        llm_response = llm(gen_response + get_diagram_prompt())
+                        final_response = enhance_flowchart_visualization(graphviz.Digraph(), llm_response).source + " diagramcreator"
+                
+                elif st.session_state.option.strip() == 'General Query: Mindmap':
+                    central_topic, topics, connections = process_mindmap_query(message, st.session_state.api)
+                    mindmap = create_mindmap(central_topic, topics, connections)
+                    final_response = mindmap.source + " mindmapcreator"
+                
+                st.session_state.history.append(Message("human", message))
+                st.session_state.history.append(Message("ai", final_response))
+                st.session_state.token_count += cb.total_tokens
+                
+            st.rerun()
+            
+        except Exception as e:
+            st.error(f"Error processing message: {str(e)}")
+            print(f"Message processing error: {e}")
+
+def process_message1(message):
+    with get_openai_callback() as cb:
+        try:
+            if len(message) > 5:
+                response = st.session_state.conversation1.run(message)
+                
+                st.session_state.history1.append(Message("human", message))
+                st.session_state.history1.append(Message("ai", response))
+                st.session_state.token_count1 += cb.total_tokens
+                
+            st.rerun()
+            
+        except Exception as e:
+            st.error(f"Error processing message: {str(e)}")
+            print(f"Message processing error: {e}")
 
 # Main page sidebar
 main_page_sidebar = st.empty()
@@ -326,7 +354,6 @@ if st.session_state.tab_selection == "Upload files":
             if not st.session_state.pages:
                 embeddings = OpenAIEmbeddings(openai_api_key=st.session_state.api)
                 st.header("Supported: PDF, Docx, PNG, CSV, Youtube & Website URLs")
-                
                 with st.expander("Upload Files"):
                     urlinput = st.text_input("Youtube Links", placeholder="Enter Youtube links separated by spaces")
                     urlinput1 = st.text_input("Website Link", placeholder="jsmastery.pro", help='URL format: jsmastery.pro')
@@ -537,12 +564,10 @@ if st.session_state.tab_selection == "Upload files":
                 st.session_state.agree = st.button('Upload')
                 if st.session_state.agree:
                     try:
-                        st.write(pages)
                         st.session_state.index = test_embed()
                         st.session_state.pages = pages
                     except Exception as e:
                         st.info("Loading Unsuccessful")
-                        st.info(e)
                         print(e)
             else:
                 st.header("Successfully uploaded")
@@ -577,9 +602,9 @@ if st.session_state.tab_selection == "Contact us":
 
 if st.session_state.tab_selection == "Begin Chat":
     st.session_state.option = st.selectbox(
-        '',
+        'Select Visualization Type',
         ('General Query: Flowchart', 'General Query: Mindmap', 'Uploaded data: Flowchart', 'Uploaded data: Quick Query', 'Uploaded data: Conversational Chat'),
-        label_visibility="collapsed"
+        label_visibility="visible"
     )
     
     if st.session_state.api:
@@ -589,8 +614,8 @@ if st.session_state.tab_selection == "Begin Chat":
                 st.caption(f"Uploaded files: {upfiles}")
                 
                 qa1 = RetrievalQA.from_chain_type(
-                    llm = OpenAI(openai_api_key=st.session_state.api),
-                    chain_type = "map_reduce",
+                    llm=OpenAI(openai_api_key=st.session_state.api),
+                    chain_type="map_reduce",
                     retriever=st.session_state.index.as_retriever(),
                 )
                 
@@ -601,11 +626,7 @@ if st.session_state.tab_selection == "Begin Chat":
                 )]
                 
                 prefix1 = """provide answers using only the tool provided. Answer in detail"""
-                suffix1 = """Begin!"
-
-                {chat_history1}
-                Question: {input1}
-                {agent_scratchpad}"""
+                suffix1 = """Begin!"\n\n{chat_history1}\nQuestion: {input1}\n{agent_scratchpad}"""
                 
                 prompt1 = ZeroShotAgent.create_prompt(
                     tools5,
@@ -620,7 +641,7 @@ if st.session_state.tab_selection == "Begin Chat":
                     )
                 
                 llm_chain1 = LLMChain(
-                    llm = OpenAI(openai_api_key=st.session_state.api),
+                    llm=OpenAI(openai_api_key=st.session_state.api),
                     prompt=prompt1,
                 )
                 agent1 = ZeroShotAgent(llm_chain=llm_chain1, tools=tools5, verbose=True)
@@ -631,278 +652,101 @@ if st.session_state.tab_selection == "Begin Chat":
                     memory=st.session_state.memory1
                 )
                 
+                # Initialize chat states
+                if "history" not in st.session_state:
+                    st.session_state.history = []
+                if "history1" not in st.session_state:
+                    st.session_state.history1 = []
+                if "token_count" not in st.session_state:
+                    st.session_state.token_count = 0
+                if "token_count1" not in st.session_state:
+                    st.session_state.token_count1 = 0
+                
                 try:
-                    @dataclass
-                    class Message:
-                        """Class for keeping track of a chat message."""
-                        origin: Literal["human", "ai"]
-                        message: str
-                    
-                    def initialize_session_state():
-                        if "history" not in st.session_state:
-                            st.session_state.history = []
-                        if "option" not in st.session_state:
-                            st.session_state.option = ""
-                        if "option1" not in st.session_state:
-                            st.session_state.option1 = ""
-                        if "history1" not in st.session_state:
-                            st.session_state.history1 = []
-                        if "token_count" not in st.session_state:
-                            st.session_state.token_count = 0
-                        if "token_count1" not in st.session_state:
-                            st.session_state.token_count1 = 0
-                        try:
-                            if "conversation" not in st.session_state:
-                                llm = OpenAI(
-                                    temperature=0,
-                                    openai_api_key=st.session_state.api,
-                                    model_name="gpt-4o-mini"
-                                )
-                                st.session_state.conversation = qa1
-                            if "conversation1" not in st.session_state:
-                                llm = OpenAI(
-                                    temperature=0,
-                                    openai_api_key=st.session_state.api,
-                                    model_name="gpt-4o-mini"
-                                )
-                                st.session_state.conversation1 = agent_chain1
-                        except Exception as e:
-                            st.write("")
-                    
-                    def on_click_callback():
-                        with get_openai_callback() as cb:
-                            human_prompt = st.session_state.human_prompt
-                            print("hi3")
-                            if len(human_prompt) > 5:
-                                try:
-                                    diag = """step1. rewrite the result as a directed graph  \n
-                                    step2: make sure the result is exactly in the format as provided in the sample. 
-                                    step 3: provide No other explanations. max no. of nodes: 10. sample format(take into consideration only the structure and format of the sample, not the actual words. make sure to include the quotes as shown in the sample. do not display the sample). 
-                                    Sample: 
-                                                "run" -> "intr"
-                                                "intr" -> "runbl intr"
-                                                "runbl" -> "run"
-                                                "run" -> "kernel"
-                                                "kernel" -> "zombie"
-                                                "kernel" -> "sleep"
-                                                "kernel" -> "runmem"
-                                                """
-                                    total = "the Question is:" + human_prompt + "\n answer the question and present the result it in this format:" + diag
-                                    print(total)
-                                    
-                                    if st.session_state.option.strip() == 'Uploaded data: Flowchart':
-                                        try:
-                                            gen_response = st.session_state.conversation.run(
-                                                "Answer in detail" + human_prompt 
-                                            )
-                                            print("llm response is 1" + gen_response)
-                                            
-                                            llm = OpenAI(openai_api_key=st.session_state.api)
-                                            llm_response = llm(gen_response + diag)
-                                            
-                                            # Use enhanced flowchart visualization
-                                            dot = enhance_flowchart_visualization(graphviz.Digraph(), llm_response)
-                                            llm_response1 = dot.source + " diagramcreator"
-                                            
-                                        except Exception as e:
-                                            llm_response1 = "Please Upload your files and try again"
-                                            
-                                    elif st.session_state.option.strip() == 'Uploaded data: Quick Query':
-                                        try:
-                                            llm_response = st.session_state.conversation.run(
-                                                "Answer in detail" + human_prompt 
-                                            )
-                                            print("llm response is 1" + llm_response)
-                                            llm_response1 = llm_response
-                                            
-                                        except Exception as e:
-                                            llm_response1 = "Please Upload your files and try again"
-                                            
-                                    elif st.session_state.option.strip() == 'General Query: Flowchart':
-                                        try:
-                                            llm = OpenAI(openai_api_key=st.session_state.api)
-                                            gen_response = llm(human_prompt + "   \n answer in detail")
-                                            if len(gen_response) > 10:
-                                                print(f"DETAILED{gen_response}")
-                                                llm_response = llm(gen_response + diag)
-                                                print(f"DETAILED{llm_response}")
-                                                
-                                                # Use enhanced flowchart visualization
-                                                dot = enhance_flowchart_visualization(graphviz.Digraph(), llm_response)
-                                                llm_response1 = dot.source + " diagramcreator"
-                                                
-                                        except Exception as e:
-                                            st.write(e)
-                                            llm_response1 = "Please enter a valid key and try again"
-                                            
-                                    elif st.session_state.option.strip() == 'General Query: Mindmap':
-                                        try:
-                                            central_topic, topics, connections = process_mindmap_query(human_prompt, st.session_state.api)
-                                            mindmap = create_mindmap(central_topic, topics, connections)
-                                            llm_response1 = mindmap.source + " mindmapcreator"
-                                            gen_response = f"Created mindmap with central topic: {central_topic}"
-                                            
-                                        except Exception as e:
-                                            llm_response1 = "Error creating mindmap. Please try again."
-                                            gen_response = ""
-                                except Exception as e:
-                                    print(e)
-                                            
-                            else:
-                                human_prompt = "Please enter a valid query"
-                                    
-                                try:
-                                    st.session_state.history.append(
-                                        Message("human", human_prompt)
-                                    )
-                                    st.session_state.history.append(
-                                        Message("ai", llm_response1)
-                                    )
-                                    if (st.session_state.option.strip() == 'General Query: Flowchart' or 
-                                        st.session_state.option.strip() == 'Uploaded data: Flowchart' or
-                                        st.session_state.option.strip() == 'General Query: Mindmap'):
-                                        st.session_state.history.append(
-                                            Message("ai", gen_response)
-                                        )
-                                    st.session_state.token_count += cb.total_tokens
-                                except Exception as e:
-                                    print(e)
-                    
-                    def on_click_callback1():
-                        with get_openai_callback() as cb:
-                            human_prompt = st.session_state.human_prompt1
-                            if len(human_prompt) > 5:
-                                try:
-                                    llm_response = st.session_state.conversation1.run(
-                                        human_prompt 
-                                    )
-                                except Exception as e:
-                                    print(e)
-                                    llm_response = "Please Upload your files and try again"
-                            else:
-                                human_prompt = "Please enter a valid query"
-                            
-                            try:
-                                st.session_state.history1.append(
-                                    Message("human", human_prompt)
-                                )
-                                st.session_state.history1.append(
-                                    Message("ai", llm_response)
-                                )
-                                st.session_state.token_count1 += cb.total_tokens
-                            except Exception as e:
-                                print(e)
-                    
-                    initialize_session_state()
-                    
-                    chat_placeholder = st.container()
-                    prompt_placeholder = st.form("chat-form")
-                    credit_card_placeholder = st.empty()
-                    chat_placeholder1 = st.container()
-                    prompt_placeholder1 = st.form("chat-form1")
-                    credit_card_placeholder1 = st.empty()
-                    
-                    if (st.session_state.option == 'Uploaded data: Quick Query' or 
-                        st.session_state.option == 'Uploaded data: Flowchart' or 
-                        st.session_state.option == 'General Query: Flowchart' or
-                        st.session_state.option == 'General Query: Mindmap'):
-                        
-                        with chat_placeholder:
-                            for chat in st.session_state.history:
-                                words = chat.message.split()
-                                last_word = words[-1] if words else ""
-                                last_word = last_word.strip()
-                                message_before_last_word = ' '.join(words[:-1]) if words else ""
-                                
-                                print(f"last word is {last_word}")
-                                print(f"rest of it is {message_before_last_word}")
-                                
-                                st.session_state.isdiagram = (last_word == "diagramcreator" or last_word == "mindmapcreator")
-                                
-                                if chat.origin == 'ai' and st.session_state.isdiagram:
-                                    content = st.graphviz_chart(message_before_last_word)
-                                    content = ""
-                                else:
-                                    content = chat.message
-                                
-                                if content:
-                                    div = f"""
-                                    <div class="chat-row 
-                                        {'' if chat.origin == 'ai' else 'row-reverse'}">
-                                        <img class="chat-icon" src="{
-                                            'https://cdn.discordapp.com/attachments/852337726904598574/1126648713788526722/ai.png' if chat.origin == 'ai' 
-                                            else 'https://cdn.discordapp.com/attachments/852337726904598574/1126648675238682655/human.png'}"
-                                            width=32 height=32>
-                                        <div class="chat-bubble
-                                        {'ai-bubble' if chat.origin == 'ai' else 'human-bubble'}">
-                                            &#8203;{content}
-                                        </div>
-                                    </div>
-                                    """
-                                    st.markdown(div, unsafe_allow_html=True)
-                            
-                            for _ in range(3):
-                                st.markdown("")
-                            st.write("""<div class='PortMarker'/>""", unsafe_allow_html=True)
-                        
-                        with prompt_placeholder:
-                            cols = st.columns((6, 1))
-                            cols[0].text_input(
-                                "Chat",
-                                value=" ",
-                                label_visibility="collapsed",
-                                key="human_prompt",
-                            )
-                            cols[1].form_submit_button(
-                                "Submit", 
-                                type="primary", 
-                                on_click=on_click_callback,
-                            )
-                            
-                    elif st.session_state.option == 'Uploaded data: Conversational Chat':
-                        with chat_placeholder1:
-                            for chat in st.session_state.history1:
-                                div = f"""
-                                <div class="chat-row 
-                                    {'' if chat.origin == 'ai' else 'row-reverse'}">
-                                    <img class="chat-icon" src="{
-                                        'https://cdn.discordapp.com/attachments/852337726904598574/1126648713788526722/ai.png' if chat.origin == 'ai' 
-                                        else 'https://cdn.discordapp.com/attachments/852337726904598574/1126648675238682655/human.png'}"
-                                        width=32 height=32>
-                                    <div class="chat-bubble
-                                    {'ai-bubble' if chat.origin == 'ai' else 'human-bubble'}">
-                                        &#8203;{chat.message}
-                                    </div>
-                                </div>
-                                """
-                                st.markdown(div, unsafe_allow_html=True)
-                            
-                            for _ in range(3):
-                                st.markdown("")
-                            st.write("""<div class='PortMarker'/>""", unsafe_allow_html=True)
-                        
-                        with prompt_placeholder1:
-                            cols = st.columns((6, 1))
-                            cols[0].text_input(
-                                "Chat",
-                                value=" ",
-                                label_visibility="collapsed",
-                                key="human_prompt1",
-                            )
-                            cols[1].form_submit_button(
-                                "Submit", 
-                                type="primary", 
-                                on_click=on_click_callback1,
-                            )
-                            
+                    if "conversation" not in st.session_state:
+                        st.session_state.conversation = qa1
+                    if "conversation1" not in st.session_state:
+                        st.session_state.conversation1 = agent_chain1
                 except Exception as e:
-                    st.header("Upload your files to begin")
-                    st.subheader("Check your OpenAI Plan")
-                    st.write(e)
+                    print(f"Conversation initialization error: {e}")
+
+                # Chat interface based on selected option
+                if (st.session_state.option in ['Uploaded data: Quick Query', 'Uploaded data: Flowchart', 
+                                              'General Query: Flowchart', 'General Query: Mindmap']):
                     
+                    # Display chat history
+                    for chat in st.session_state.history:
+                        if chat.origin == 'ai' and chat.message.endswith((' diagramcreator', ' mindmapcreator')):
+                            message_parts = chat.message.rsplit(' ', 1)
+                            st.graphviz_chart(message_parts[0])
+                        else:
+                            div = f"""
+                            <div class="chat-row {'' if chat.origin == 'ai' else 'row-reverse'}">
+                                <img class="chat-icon" src="{'https://cdn.discordapp.com/attachments/852337726904598574/1126648713788526722/ai.png' if chat.origin == 'ai' else 'https://cdn.discordapp.com/attachments/852337726904598574/1126648675238682655/human.png'}" width=32 height=32>
+                                <div class="chat-bubble {'ai-bubble' if chat.origin == 'ai' else 'human-bubble'}">
+                                    &#8203;{chat.message}
+                                </div>
+                            </div>
+                            """
+                            st.markdown(div, unsafe_allow_html=True)
+                    
+                    # Chat input form
+                    with st.form(key="chat_form", clear_on_submit=True):
+                        cols = st.columns([6, 1])
+                        with cols[0]:
+                            user_input = st.text_input(
+                                label="Your message",
+                                placeholder="Type your message here...",
+                                key="human_prompt",
+                                label_visibility="collapsed"
+                            )
+                        with cols[1]:
+                            submit_button = st.form_submit_button(
+                                label="Send",
+                                type="primary",
+                                use_container_width=True
+                            )
+                            
+                        if submit_button and user_input:
+                            process_message(user_input)
+                
+                elif st.session_state.option == 'Uploaded data: Conversational Chat':
+                    # Display chat history
+                    for chat in st.session_state.history1:
+                        div = f"""
+                        <div class="chat-row {'' if chat.origin == 'ai' else 'row-reverse'}">
+                            <img class="chat-icon" src="{'https://cdn.discordapp.com/attachments/852337726904598574/1126648713788526722/ai.png' if chat.origin == 'ai' else 'https://cdn.discordapp.com/attachments/852337726904598574/1126648675238682655/human.png'}" width=32 height=32>
+                            <div class="chat-bubble {'ai-bubble' if chat.origin == 'ai' else 'human-bubble'}">
+                                &#8203;{chat.message}
+                            </div>
+                        </div>
+                        """
+                        st.markdown(div, unsafe_allow_html=True)
+                    
+                    # Chat input form
+                    with st.form(key="chat_form1", clear_on_submit=True):
+                        cols = st.columns([6, 1])
+                        with cols[0]:
+                            user_input = st.text_input(
+                                label="Your message",
+                                placeholder="Type your message here...",
+                                key="human_prompt1",
+                                label_visibility="collapsed"
+                            )
+                        with cols[1]:
+                            submit_button = st.form_submit_button(
+                                label="Send",
+                                type="primary",
+                                use_container_width=True
+                            )
+                            
+                        if submit_button and user_input:
+                            process_message1(user_input)
+            else:
+                st.info("Please upload your files first.")
         except Exception as e:
-            print(e)
-            st.info("Add key and upload files/URL to continue")
+            st.error(f"An error occurred: {str(e)}")
+            print(f"Chat interface error: {e}")
     else:
         st.header("Enter Your API Key to continue")
 
